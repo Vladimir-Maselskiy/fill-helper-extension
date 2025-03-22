@@ -1,0 +1,86 @@
+{
+  "__chrome|safari__manifest_version": 3,
+  "__firefox__manifest_version": 2,
+  "name": "Starter",
+  "version": "1.0.0",
+  "icons": {
+    "16": "assets/icons/favicon-16.png",
+    "32": "assets/icons/favicon-32.png",
+    "48": "assets/icons/favicon-48.png",
+    "128": "assets/icons/favicon-128.png"
+  },
+  "description": "Cross-browser web extension",
+  "homepage_url": "https://simplify.jobs/",
+  "short_name": "Starter",
+  "__chrome|safari__permissions": ["activeTab"],
+  "__chrome|safari__host_permissions": ["*://*/*"],
+  "__firefox__permissions": ["activeTab", "http://*/*", "https://*/*"],
+  "__chrome|safari__content_security_policy": {
+    "extension_pages": "default-src 'self' 'wasm-unsafe-eval'; connect-src *; img-src 'self' data:"
+  },
+  "__firefox__content_security_policy": "default-src 'self' 'wasm-unsafe-eval'; script-src 'self' 'wasm-unsafe-eval'; connect-src *; img-src 'self' data:",
+  "__chrome|safari|firefox__author": "Simplify Jobs Inc.",
+  "__opera__developer": {
+    "name": "Simplify Jobs Inc."
+  },
+  "__firefox__browser_specific_settings": {
+    "gecko": {
+      "id": "software@simplify.jobs",
+      "strict_min_version": "121.0"
+    }
+  },
+  "__chrome|safari__minimum_chrome_version": "109",
+  "__opera__minimum_opera_version": "72",
+  "__chrome|safari|opera__action": {
+    "default_icon": {
+      "16": "assets/icons/favicon-16.png",
+      "32": "assets/icons/favicon-32.png",
+      "48": "assets/icons/favicon-48.png",
+      "128": "assets/icons/favicon-128.png"
+    },
+    "default_title": "Starter",
+    "__chrome__chrome_style": false
+  },
+  "__firefox__browser_action": {
+    "default_icon": {
+      "16": "assets/icons/favicon-16.png",
+      "32": "assets/icons/favicon-32.png",
+      "48": "assets/icons/favicon-48.png",
+      "128": "assets/icons/favicon-128.png"
+    },
+    "default_title": "Starter",
+    "browser_style": false
+  },
+  "__chrome__background": {
+    "service_worker": "js/background.bundle.js"
+  },
+  "__firefox|safari__background": {
+    "scripts": ["js/background.bundle.js"]
+  },
+  "__prod__content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["js/contentScript.bundle.js"],
+      "run_at": "document_end",
+      "all_frames": true
+    }
+  ],
+  "__dev__content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["js/contentScript.bundle.js"],
+      "run_at": "document_end",
+      "all_frames": true
+    }
+  ],
+  "__dev|chrome|safari__externally_connectable": {
+    "matches": ["http://localhost/*"]
+  },
+  "__chrome|safari__web_accessible_resources": [
+    {
+      "resources": ["assets/*", "css/*", "js/*"],
+      "matches": ["*://*/*"]
+    }
+  ],
+  "__firefox__web_accessible_resources": ["assets/*", "css/*", "js/*"]
+}

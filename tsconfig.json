@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "Background": ["./Background"],
+      "ContentScript": ["./ContentScript"]
+    },
+    "rootDirs": ["src"],
+    "outDir": "dist/js",
+    "module": "es2022",
+    "target": "es2017",
+    "jsx": "react",
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": false,
+    "strictNullChecks": true,
+    "importHelpers": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": false,
+    "lib": ["dom", "es2017", "es2017.string"],
+    "types": ["chrome", "node"],
+    "typeRoots": ["./node_modules/@types"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}
