@@ -2,26 +2,28 @@ import React, { useEffect, useState } from 'react';
 import { StyledPopup } from './Popup.styled';
 import { AutofillButton } from '../AutofillButton/AutofillButton';
 import { TodoList } from '../TodoList/TodoList';
+import { Divider, Flex, Tag } from 'antd';
 
 export type TStatus = 'unfilled' | 'filling' | 'filled';
 export type TTodo = { name: string; status: TStatus };
 
 export const Popup = () => {
   let observer = null;
+  const isTopLevel = window.top === window.self;
   const todoesJSON = ['start', 'foo', 'bar'];
-  const [status, setStatus] = useState<'unfilled' | 'filling' | 'filled'>(
-    'unfilled'
-  );
+
   const [todoes, setTodoes] = useState<TTodo[]>([
     { name: 'start', status: 'unfilled' },
     { name: 'foo', status: 'unfilled' },
     { name: 'bar', status: 'unfilled' },
   ]);
   const [currentTodo, setCurrentTodo] = useState(todoesJSON[0]);
-
   const [todoInput, setTodoInput] = useState<HTMLInputElement | null>(null);
 
   useEffect(() => {
+    if (isTopLevel) {
+      return;
+    }
     observeForElement({
       xPath: '//input',
     });
@@ -32,6 +34,22 @@ export const Popup = () => {
       todoInput.value = 'Hello, Autofill!';
     }
   }, [todoInput]);
+
+  const updateStatus = ({
+    target,
+    status,
+  }: {
+    target: string;
+    status: TStatus;
+  }) => {
+    const newTodoes = todoes.map(todo => {
+      if (todo.name === target) {
+        return { ...todo, status: status };
+      }
+      return todo;
+    });
+    setTodoes(newTodoes);
+  };
 
   function getElementByXPath(xpath: string) {
     console.log(document.body.innerHTML);
@@ -84,12 +102,13 @@ export const Popup = () => {
       xPath: '//input[@id="new-todo"]',
     });
     if (targetElement instanceof HTMLInputElement) {
-      targetElement.value = 'Hello, Autofill!'; // Вводимо текст
-      console.log('Введено в інпут');
+      targetElement.value = 'Hello, Autofill!';
     }
   }
 
-  const handleClick = () => {
+  const handleClick = ({ target }: { target: string }) => {
+    updateStatus({ target, status: 'filling' });
+
     const buttonXPath = '//div[@role="button" and @id="startButton"]';
     const buttonElement = getElementByXPath(buttonXPath);
 
@@ -100,9 +119,10 @@ export const Popup = () => {
       console.log('Button not found!');
     }
   };
-  return window.top === window.self ? (
+  return isTopLevel ? (
     <StyledPopup>
-      <AutofillButton handleClick={handleClick} />
+      <AutofillButton handleClick={() => handleClick({ target: 'start' })} />
+      <Divider />
       <TodoList todoes={todoes} />
     </StyledPopup>
   ) : null;

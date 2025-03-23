@@ -1,25 +1,12 @@
 import React from 'react';
 import { Flex, List, Tag } from 'antd';
-import {
-  CheckCircleOutlined,
-  ExclamationCircleOutlined,
-  SyncOutlined,
-} from '@ant-design/icons';
+
 import { TStatus, TTodo } from '../Popup/Popup';
+import { getTagDataByStatus } from 'ContentScript/utils/getTagDataByStatus';
 
 type TProps = { todoes: TTodo[] };
 
 export const TodoList = ({ todoes }: TProps) => {
-  const getIconByStatus = (status: TStatus) => {
-    switch (status) {
-      case 'unfilled':
-        return { icon: <ExclamationCircleOutlined />, color: 'default' };
-      case 'filling':
-        return { icon: <SyncOutlined spin />, color: 'processing' };
-      case 'filled':
-        return { icon: <CheckCircleOutlined />, color: 'success' };
-    }
-  };
   return (
     <List
       size="small"
@@ -27,7 +14,7 @@ export const TodoList = ({ todoes }: TProps) => {
       style={{
         width: '100%',
         marginTop: '10px',
-        maxHeight: '118px',
+        maxHeight: '140px',
         overflowY: 'scroll',
       }}
       dataSource={todoes}
@@ -40,8 +27,8 @@ export const TodoList = ({ todoes }: TProps) => {
             </Flex>
             <Flex justify="left" style={{ width: '50%' }}>
               <Tag
-                icon={getIconByStatus(status).icon}
-                color={getIconByStatus(status).color}
+                icon={getTagDataByStatus(status).icon}
+                color={getTagDataByStatus(status).color}
               >
                 {status}
               </Tag>
