@@ -2,14 +2,14 @@ import { Button, Flex, Tag } from 'antd';
 import { getTagDataByStatus } from 'ContentScript/utils/getTagDataByStatus';
 import { on } from 'events';
 import React, { useEffect, useState } from 'react';
+import { TStatus } from '../Popup/Popup';
 
 type TProps = {
   handleClick: () => void;
+  status: TStatus | null;
 };
 
-const status = 'filling';
-
-export const AutofillButton = ({ handleClick }: TProps) => {
+export const AutofillButton = ({ handleClick, status }: TProps) => {
   return (
     <Flex justify="space-between" align="center">
       <Button
@@ -19,12 +19,14 @@ export const AutofillButton = ({ handleClick }: TProps) => {
       >
         Autofill
       </Button>
-      <Tag
-        icon={getTagDataByStatus(status).icon}
-        color={getTagDataByStatus(status).color}
-      >
-        {status}
-      </Tag>
+      {status && (
+        <Tag
+          icon={getTagDataByStatus(status).icon}
+          color={getTagDataByStatus(status).color}
+        >
+          {status}
+        </Tag>
+      )}
     </Flex>
   );
 };

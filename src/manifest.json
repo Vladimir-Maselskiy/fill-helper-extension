@@ -12,7 +12,7 @@
   "description": "Cross-browser web extension",
   "homepage_url": "https://simplify.jobs/",
   "short_name": "Starter",
-  "__chrome|safari__permissions": ["activeTab"],
+  "__chrome|safari__permissions": ["activeTab", "storage"],
   "__chrome|safari__host_permissions": ["*://*/*"],
   "__firefox__permissions": ["activeTab", "http://*/*", "https://*/*"],
   "__chrome|safari__content_security_policy": {

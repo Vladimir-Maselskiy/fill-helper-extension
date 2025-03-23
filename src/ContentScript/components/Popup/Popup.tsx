@@ -3,6 +3,10 @@ import { StyledPopup } from './Popup.styled';
 import { AutofillButton } from '../AutofillButton/AutofillButton';
 import { TodoList } from '../TodoList/TodoList';
 import { Divider, Flex, Tag } from 'antd';
+import { getCurrentAutofillStatus } from 'ContentScript/utils/getCurrentAutofillStatus';
+import { initialTodoes } from 'ContentScript/data/initialTodoes';
+import { updateTodoesStatus } from 'ContentScript/utils/updateTodoesStatus';
+import { setAutofillButtonStatusToStorage } from 'ContentScript/utils/setAutofillButtonStatusToStorage';
 
 export type TStatus = 'unfilled' | 'filling' | 'filled';
 export type TTodo = { name: string; status: TStatus };
@@ -12,18 +16,36 @@ export const Popup = () => {
   const isTopLevel = window.top === window.self;
   const todoesJSON = ['start', 'foo', 'bar'];
 
-  const [todoes, setTodoes] = useState<TTodo[]>([
-    { name: 'start', status: 'unfilled' },
-    { name: 'foo', status: 'unfilled' },
-    { name: 'bar', status: 'unfilled' },
-  ]);
-  const [currentTodo, setCurrentTodo] = useState(todoesJSON[0]);
+  const [todoes, setTodoes] = useState<TTodo[]>([]);
+  const [autofillButtonStatus, setAutofillButtonStatus] =
+    useState<TStatus | null>(null);
+  const [currentTodo, setCurrentTodo] = useState('');
   const [todoInput, setTodoInput] = useState<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    if (isTopLevel) {
-      return;
-    }
+    (async () => {
+      const {
+        topButton,
+        todoes: todoesFromStorage,
+      }: { topButton: TStatus | null; todoes: TTodo[] | null } =
+        await getCurrentAutofillStatus();
+      console.log('topButton', topButton);
+      console.log('todoesFromStorage', todoesFromStorage);
+      topButton
+        ? setAutofillButtonStatus(topButton)
+        : setAutofillButtonStatus('unfilled');
+      todoesFromStorage
+        ? setTodoes(todoesFromStorage)
+        : setTodoes(initialTodoes);
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (!autofillButtonStatus) return;
+    setAutofillButtonStatusToStorage(autofillButtonStatus);
+  }, [autofillButtonStatus]);
+
+  useEffect(() => {
     observeForElement({
       xPath: '//input',
     });
@@ -34,22 +56,6 @@ export const Popup = () => {
       todoInput.value = 'Hello, Autofill!';
     }
   }, [todoInput]);
-
-  const updateStatus = ({
-    target,
-    status,
-  }: {
-    target: string;
-    status: TStatus;
-  }) => {
-    const newTodoes = todoes.map(todo => {
-      if (todo.name === target) {
-        return { ...todo, status: status };
-      }
-      return todo;
-    });
-    setTodoes(newTodoes);
-  };
 
   function getElementByXPath(xpath: string) {
     console.log(document.body.innerHTML);
@@ -107,7 +113,8 @@ export const Popup = () => {
   }
 
   const handleClick = ({ target }: { target: string }) => {
-    updateStatus({ target, status: 'filling' });
+    setAutofillButtonStatus('filling');
+    updateTodoesStatus({ target, status: 'filling', todoes, setTodoes });
 
     const buttonXPath = '//div[@role="button" and @id="startButton"]';
     const buttonElement = getElementByXPath(buttonXPath);
@@ -121,7 +128,10 @@ export const Popup = () => {
   };
   return isTopLevel ? (
     <StyledPopup>
-      <AutofillButton handleClick={() => handleClick({ target: 'start' })} />
+      <AutofillButton
+        handleClick={() => handleClick({ target: 'start' })}
+        status={autofillButtonStatus}
+      />
       <Divider />
       <TodoList todoes={todoes} />
     </StyledPopup>
