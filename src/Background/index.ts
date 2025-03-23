@@ -1,4 +1,4 @@
-import { TStatus } from 'ContentScript/components/Popup/Popup';
+import { TStatus, TTodo } from 'ContentScript/components/Popup/Popup';
 import browser from 'webextension-polyfill';
 
 const action = browser.action || browser.browserAction;
@@ -27,6 +27,8 @@ browser.runtime.onMessage.addListener(
       setCurrentAutofillButtonStatus(data as TStatus).then(resp =>
         response(resp)
       );
+    } else if (type === 'SET_CURRENT_TODOES_STATUS') {
+      setCurrentTodoesStatus(data as TTodo[]).then(resp => response(resp));
     }
     return true;
   }
@@ -40,6 +42,11 @@ async function getCurrentAutofillStatus() {
 
 async function setCurrentAutofillButtonStatus(status: TStatus) {
   await setToLocalstorage({ topButton: status });
+  const currentAutofillStatus = await getCurrentAutofillStatus();
+  return currentAutofillStatus;
+}
+async function setCurrentTodoesStatus(todoes: TTodo[]) {
+  await setToLocalstorage({ todoes });
   const currentAutofillStatus = await getCurrentAutofillStatus();
   return currentAutofillStatus;
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Flex, List, Tag } from 'antd';
 
-import { TStatus, TTodo } from '../Popup/Popup';
+import { TTodo } from '../Popup/Popup';
 import { getTagDataByStatus } from 'ContentScript/utils/getTagDataByStatus';
 
 type TProps = { todoes: TTodo[] };
@@ -29,6 +29,7 @@ export const TodoList = ({ todoes }: TProps) => {
               <Tag
                 icon={getTagDataByStatus(status).icon}
                 color={getTagDataByStatus(status).color}
+                style={{ width: '74px' }}
               >
                 {status}
               </Tag>

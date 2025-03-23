@@ -6,7 +6,10 @@ import { Divider, Flex, Tag } from 'antd';
 import { getCurrentAutofillStatus } from 'ContentScript/utils/getCurrentAutofillStatus';
 import { initialTodoes } from 'ContentScript/data/initialTodoes';
 import { updateTodoesStatus } from 'ContentScript/utils/updateTodoesStatus';
-import { setAutofillButtonStatusToStorage } from 'ContentScript/utils/setAutofillButtonStatusToStorage';
+import {
+  setAutofillButtonStatusToStorage,
+  setTodoesStatusToStorage,
+} from 'ContentScript/utils/setAutofillButtonStatusToStorage';
 
 export type TStatus = 'unfilled' | 'filling' | 'filled';
 export type TTodo = { name: string; status: TStatus };
@@ -44,6 +47,11 @@ export const Popup = () => {
     if (!autofillButtonStatus) return;
     setAutofillButtonStatusToStorage(autofillButtonStatus);
   }, [autofillButtonStatus]);
+
+  useEffect(() => {
+    if (!todoes.length) return;
+    setTodoesStatusToStorage(todoes);
+  }, [todoes]);
 
   useEffect(() => {
     observeForElement({

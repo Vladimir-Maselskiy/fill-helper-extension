@@ -7,3 +7,11 @@ export const setAutofillButtonStatusToStorage = async (status: TStatus) => {
   })) as { topButton: TStatus | null; todoes: TTodo[] | null };
   return currentAutofillStatus;
 };
+
+export const setTodoesStatusToStorage = async (todoes: TTodo[]) => {
+  const currentAutofillStatus = (await browser.runtime.sendMessage({
+    type: 'SET_CURRENT_TODOES_STATUS',
+    data: todoes,
+  })) as { topButton: TStatus | null; todoes: TTodo[] | null };
+  return currentAutofillStatus;
+};
