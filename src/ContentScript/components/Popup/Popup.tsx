@@ -10,20 +10,22 @@ import {
   setAutofillButtonStatusToStorage,
   setTodoesStatusToStorage,
 } from 'ContentScript/utils/setAutofillButtonStatusToStorage';
+import { initializeIframe } from 'ContentScript/utils/initializeIframe';
+import { getElementByXPath } from 'ContentScript/utils/getElementByXPath';
+import { start } from 'repl';
+import { startAutofilling } from 'ContentScript/utils/startAutofilling';
 
 export type TStatus = 'unfilled' | 'filling' | 'filled';
 export type TTodo = { name: string; status: TStatus };
 
 export const Popup = () => {
-  let observer = null;
   const isTopLevel = window.top === window.self;
-  const todoesJSON = ['start', 'foo', 'bar'];
 
   const [todoes, setTodoes] = useState<TTodo[]>([]);
   const [autofillButtonStatus, setAutofillButtonStatus] =
     useState<TStatus | null>(null);
-  const [currentTodo, setCurrentTodo] = useState('');
-  const [todoInput, setTodoInput] = useState<HTMLInputElement | null>(null);
+  const [isTodoInput, setIsTodoInput] = useState(false);
+  const [isStartAutofilling, setIsStartAutofilling] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -32,8 +34,6 @@ export const Popup = () => {
         todoes: todoesFromStorage,
       }: { topButton: TStatus | null; todoes: TTodo[] | null } =
         await getCurrentAutofillStatus();
-      console.log('topButton', topButton);
-      console.log('todoesFromStorage', todoesFromStorage);
       topButton
         ? setAutofillButtonStatus(topButton)
         : setAutofillButtonStatus('unfilled');
@@ -51,72 +51,47 @@ export const Popup = () => {
   useEffect(() => {
     if (!todoes.length) return;
     setTodoesStatusToStorage(todoes);
+    isTodoInput && updateStartButtonStatus();
   }, [todoes]);
 
   useEffect(() => {
-    observeForElement({
-      xPath: '//input',
-    });
+    if (isTodoInput) {
+      updateStartButtonStatus();
+      if (!todoes.length) return;
+      if (!isStartAutofilling) startAutofilling(todoes);
+      setIsStartAutofilling(true);
+    }
+  }, [isTodoInput, todoes.length]);
+
+  useEffect(() => {
+    if (!isTopLevel) initializeIframe();
   }, []);
 
   useEffect(() => {
-    if (todoInput) {
-      todoInput.value = 'Hello, Autofill!';
-    }
-  }, [todoInput]);
-
-  function getElementByXPath(xpath: string) {
-    console.log(document.body.innerHTML);
-    const result = document.evaluate(
-      xpath,
-      document,
-      null,
-      XPathResult.FIRST_ORDERED_NODE_TYPE,
-      null
-    );
-    console.log('result', result);
-    return result.singleNodeValue;
-  }
-
-  function observeForElement({
-    xPath,
-  }: {
-    xPath: string;
-  }): Promise<Node | null> {
-    const targetElement = getElementByXPath(xPath);
-    if (targetElement) {
-      setTodoInput(targetElement as HTMLInputElement);
-      return Promise.resolve(targetElement);
-    }
-    return new Promise(resolve => {
-      const observer = new MutationObserver((mutationsList, observer) => {
-        for (const mutation of mutationsList) {
-          if (mutation.type === 'childList') {
-            console.log('mutation', mutation);
-            const targetElement = getElementByXPath(xPath);
-
-            if (targetElement) {
-              console.log('targetElement', targetElement);
-              setTodoInput(targetElement as HTMLInputElement);
-              resolve(targetElement);
-            }
-          }
+    if (isTopLevel) {
+      window.addEventListener('message', event => {
+        if (event.data.type === 'INPUT_FOUND') {
+          setIsTodoInput(true);
         }
       });
+    }
+  });
 
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true,
+  function updateStartButtonStatus() {
+    const currentStartButtonStatus = todoes.find(
+      todo => todo.name === 'start'
+    )?.status;
+    if (currentStartButtonStatus === 'filled') return;
+    if (
+      autofillButtonStatus === 'filling' ||
+      autofillButtonStatus === 'filled'
+    ) {
+      updateTodoesStatus({
+        target: 'start',
+        status: 'filled',
+        todoes,
+        setTodoes,
       });
-    });
-  }
-
-  async function startAutofilling() {
-    const targetElement = await observeForElement({
-      xPath: '//input[@id="new-todo"]',
-    });
-    if (targetElement instanceof HTMLInputElement) {
-      targetElement.value = 'Hello, Autofill!';
     }
   }
 
@@ -128,7 +103,7 @@ export const Popup = () => {
     const buttonElement = getElementByXPath(buttonXPath);
 
     if (buttonElement && buttonElement instanceof HTMLElement) {
-      startAutofilling();
+      //   startAutofilling();
       buttonElement.click();
     } else {
       console.log('Button not found!');
