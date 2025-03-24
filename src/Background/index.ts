@@ -17,25 +17,20 @@ action.onClicked.addListener(tab => {
   });
 });
 
+console.log('browse', browser);
+
 browser.runtime.onMessage.addListener(
-  async (message: { type: string; data?: any }, sender, response) => {
+  (message: { type: string; data?: any }, sender, response) => {
     const { type, data } = message;
 
-    try {
-      if (type === 'GET_CURRENT_AUTOFILL_STATUS') {
-        const resp = await getCurrentAutofillStatus();
-        response(resp);
-      } else if (type === 'SET_CURRENT_AUTOFILL_BUTTON_STATUS') {
-        const resp = await setCurrentAutofillButtonStatus(data as TStatus);
-        response(resp);
-      } else if (type === 'SET_CURRENT_TODOES_STATUS') {
-        const resp = await setCurrentTodoesStatus(data as TTodo[]);
-        response(resp);
-      } else if (type === 'CLEAR_LOCAL_STORAGE') {
-        await browser.storage.local.clear();
-      }
-    } catch (error) {
-      console.error('Error handling message:', error);
+    if (type === 'GET_CURRENT_AUTOFILL_STATUS') {
+      getCurrentAutofillStatus().then(resp => response(resp));
+    } else if (type === 'SET_CURRENT_AUTOFILL_BUTTON_STATUS') {
+      setCurrentAutofillButtonStatus(data as TStatus).then(resp =>
+        response(resp)
+      );
+    } else if (type === 'SET_CURRENT_TODOES_STATUS') {
+      setCurrentTodoesStatus(data as TTodo[]).then(resp => response(resp));
     }
     return true;
   }

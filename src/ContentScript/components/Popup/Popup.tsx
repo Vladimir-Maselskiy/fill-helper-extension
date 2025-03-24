@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { StyledPopup } from './Popup.styled';
 import { AutofillButton } from '../AutofillButton/AutofillButton';
 import { TodoList } from '../TodoList/TodoList';
-import { Button, Divider, Flex } from 'antd';
+import { Divider, Flex } from 'antd';
 import { getCurrentAutofillStatus } from 'ContentScript/utils/getCurrentAutofillStatus';
 import { updateTodoesStatus } from 'ContentScript/utils/updateTodoesStatus';
 import {
@@ -13,7 +12,6 @@ import { initializeIframe } from 'ContentScript/utils/initializeIframe';
 import { getElementByXPath } from 'ContentScript/utils/getElementByXPath';
 import { startAutofilling } from 'ContentScript/utils/startAutofilling';
 import { clearTodoesStatus } from 'ContentScript/utils/clearTodoesStatus';
-import { clearLocalStorage } from 'ContentScript/utils/clearLocalStorage';
 import { getIsNewInitialTodoes } from 'ContentScript/utils/getIsNewInitialTodoes';
 import { getInitalTodoes } from 'ContentScript/utils/getInitialTodoes';
 
@@ -42,6 +40,7 @@ export const Popup = () => {
         todoes: todoesFromStorage,
       }: { topButton: TStatus | null; todoes: TTodo[] | null } =
         await getCurrentAutofillStatus();
+      console.log('topButton', topButton);
       topButton
         ? setAutofillButtonStatus(topButton)
         : setAutofillButtonStatus('unfilled');
@@ -49,6 +48,7 @@ export const Popup = () => {
         todoesFromStorage,
         initialTodoes,
       });
+      console.log('isNewInitialTodoes', isNewInitialTodoes);
       if (isNewInitialTodoes) {
         setTodoes(initialTodoes);
         setAutofillButtonStatus('unfilled');
@@ -114,14 +114,12 @@ export const Popup = () => {
           } else {
             setAutofillButtonStatus('filled');
             setCurrentTodoIndex(1);
-            clearLocalStorage();
           }
         } else if (type === 'CLEAR_COMPLETED') {
           console.log('todoes', todoes);
           clearTodoesStatus({ todoes, setTodoes });
           setAutofillButtonStatus('unfilled');
           setCurrentTodoIndex(1);
-          clearLocalStorage();
         }
       };
 
