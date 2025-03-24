@@ -4,7 +4,6 @@ import { AutofillButton } from '../AutofillButton/AutofillButton';
 import { TodoList } from '../TodoList/TodoList';
 import { Button, Divider } from 'antd';
 import { getCurrentAutofillStatus } from 'ContentScript/utils/getCurrentAutofillStatus';
-import { initialTodoes } from 'ContentScript/data/initialTodoes';
 import { updateTodoesStatus } from 'ContentScript/utils/updateTodoesStatus';
 import {
   setAutofillButtonStatusToStorage,
@@ -15,6 +14,8 @@ import { getElementByXPath } from 'ContentScript/utils/getElementByXPath';
 import { startAutofilling } from 'ContentScript/utils/startAutofilling';
 import { clearTodoesStatus } from 'ContentScript/utils/clearTodoesStatus';
 import { clearLocalStorage } from 'ContentScript/utils/clearLocalStorage';
+import { getIsNewInitialTodoes } from 'ContentScript/utils/getIsNewInitialTodoes';
+import { getInitalTodoes } from 'ContentScript/utils/getInitialTodoes';
 
 export type TStatus = 'unfilled' | 'filling' | 'filled';
 export type TTodo = { name: string; status: TStatus };
@@ -32,6 +33,7 @@ export const Popup = () => {
   useEffect(() => {
     if (!isTopLevel) return;
     (async () => {
+      const initialTodoes = await getInitalTodoes();
       const {
         topButton,
         todoes: todoesFromStorage,
@@ -40,9 +42,18 @@ export const Popup = () => {
       topButton
         ? setAutofillButtonStatus(topButton)
         : setAutofillButtonStatus('unfilled');
-      todoesFromStorage && todoesFromStorage.length
-        ? setTodoes(todoesFromStorage)
-        : setTodoes(initialTodoes);
+      const isNewInitialTodoes = getIsNewInitialTodoes({
+        todoesFromStorage,
+        initialTodoes,
+      });
+      if (isNewInitialTodoes) {
+        setTodoes(initialTodoes);
+        setAutofillButtonStatus('unfilled');
+      } else {
+        todoesFromStorage && todoesFromStorage.length
+          ? setTodoes(todoesFromStorage)
+          : setTodoes(initialTodoes);
+      }
     })();
   }, []);
 
@@ -58,6 +69,8 @@ export const Popup = () => {
 
   useEffect(() => {
     if (!isTopLevel || !isTodoInput) return;
+    const isInFillingProcess = autofillButtonStatus === 'filling';
+    if (!isInFillingProcess) return;
     updateStartButtonStatus();
     if (!todoes.length) return;
     if (!isStartAutofilling) {
@@ -97,6 +110,7 @@ export const Popup = () => {
             startAutofilling({ todoes, setTodoes, index: newIndex });
           } else {
             setAutofillButtonStatus('filled');
+            setCurrentTodoIndex(1);
             clearLocalStorage();
           }
         } else if (type === 'CLEAR_COMPLETED') {

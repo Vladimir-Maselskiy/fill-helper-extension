@@ -1,0 +1,65 @@
+[
+  [
+    "start",
+    [
+      {
+        "path": ".//button[contains(., \"Start\")]",
+        "method": "click"
+      }
+    ]
+  ],
+  [
+    "foo",
+    [
+      {
+        "path": ".//fieldset[@id=\"foo\"]//input[@type=\"text\"]",
+        "actions": [
+          {
+            "method": "default",
+            "value": "foo"
+          },
+          {
+            "path": ".//fieldset[@id=\"foo\"]//input[@type=\"checkbox\"]",
+            "method": "click"
+          }
+        ]
+      }
+    ]
+  ],
+  [
+    "bar",
+    [
+      {
+        "path": ".//fieldset[@id=\"bar\"]//input[@type=\"text\"]",
+        "actions": [
+          {
+            "method": "default",
+            "value": "bar"
+          },
+          {
+            "path": ".//fieldset[@id=\"bar\"]//input[@type=\"checkbox\"]",
+            "method": "click"
+          }
+        ]
+      }
+    ]
+  ],
+  [
+    "baz",
+    [
+      {
+        "path": ".//fieldset[@id=\"bar\"]//input[@type=\"text\"]",
+        "actions": [
+          {
+            "method": "default",
+            "value": "bar"
+          },
+          {
+            "path": ".//fieldset[@id=\"bar\"]//input[@type=\"checkbox\"]",
+            "method": "click"
+          }
+        ]
+      }
+    ]
+  ]
+]
