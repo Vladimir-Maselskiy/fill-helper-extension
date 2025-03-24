@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyledPopup } from './Popup.styled';
 import { AutofillButton } from '../AutofillButton/AutofillButton';
 import { TodoList } from '../TodoList/TodoList';
-import { Button, Divider } from 'antd';
+import { Button, Divider, Flex } from 'antd';
 import { getCurrentAutofillStatus } from 'ContentScript/utils/getCurrentAutofillStatus';
 import { updateTodoesStatus } from 'ContentScript/utils/updateTodoesStatus';
 import {
@@ -22,6 +22,9 @@ export type TTodo = { name: string; status: TStatus };
 
 export const Popup = () => {
   const isTopLevel = window.top === window.self;
+  const isCurrentDomain = window.location.href.includes(
+    'simplifyjobs.github.io/extension-take-home'
+  );
 
   const [todoes, setTodoes] = useState<TTodo[]>([]);
   const [autofillButtonStatus, setAutofillButtonStatus] =
@@ -164,14 +167,27 @@ export const Popup = () => {
       console.log('Button not found!');
     }
   };
-  return isTopLevel ? (
-    <StyledPopup>
+  return isTopLevel && isCurrentDomain ? (
+    <Flex
+      style={{
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        width: '300px',
+        height: '300px',
+        background: 'white',
+        border: '1px solid #ccc',
+        boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.2)',
+        zIndex: 99999,
+        padding: '10px',
+      }}
+    >
       <AutofillButton
         handleClick={() => handleClick({ target: todoes[0].name })}
         status={autofillButtonStatus}
       />
       <Divider />
       <TodoList todoes={todoes} />
-    </StyledPopup>
+    </Flex>
   ) : null;
 };

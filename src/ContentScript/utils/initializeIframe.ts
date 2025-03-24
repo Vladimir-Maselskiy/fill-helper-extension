@@ -64,41 +64,40 @@ async function autofillCurrentTodo({ todo }: { todo: TTodo }) {
   const currentInputRef =
     inputRef || (getElementByXPath('//input') as HTMLInputElement);
   if (!currentInputRef) return;
-  setTimeout(() => {
-    currentInputRef.value = todo.name;
-    currentInputRef.dispatchEvent(new Event('input'));
-    currentInputRef.focus();
-    const keyUpEvent = new KeyboardEvent('keyup', {
-      key: 'Enter',
-      keyCode: 13,
-      bubbles: true,
-      cancelable: true,
-    });
-    currentInputRef.dispatchEvent(keyUpEvent);
-  }, 1500);
 
-  setTimeout(() => {
-    const checkBoxRef = getElementByXPath(
-      `//ul[@id="todo-list"]//li[.//label[text()="${todo.name}"]]//input[@type="checkbox"]`
-    ) as HTMLInputElement;
-    if (checkBoxRef) {
-      checkBoxRef.click();
-    }
-    if (!checkBoxRef.checked) return;
-    const parentLi = checkBoxRef.closest('li');
-    if (parentLi) {
-      const label = parentLi.querySelector('label');
-      if (label) {
-        const todoName = label.textContent?.trim();
-        if (todoName) {
-          sendMessageToTopFrame({
-            type: 'TODO_COMPLETED',
-            data: todoName,
-          });
-        }
+  await new Promise(resolve => setTimeout(resolve, 1500));
+  currentInputRef.value = todo.name;
+  currentInputRef.dispatchEvent(new Event('input'));
+  currentInputRef.focus();
+  const keyUpEvent = new KeyboardEvent('keyup', {
+    key: 'Enter',
+    keyCode: 13,
+    bubbles: true,
+    cancelable: true,
+  });
+  currentInputRef.dispatchEvent(keyUpEvent);
+
+  await new Promise(resolve => setTimeout(resolve, 1500));
+  const checkBoxRef = getElementByXPath(
+    `//ul[@id="todo-list"]//li[.//label[text()="${todo.name}"]]//input[@type="checkbox"]`
+  ) as HTMLInputElement;
+  if (!checkBoxRef) return;
+  checkBoxRef.click();
+
+  if (!checkBoxRef.checked) return;
+  const parentLi = checkBoxRef.closest('li');
+  if (parentLi) {
+    const label = parentLi.querySelector('label');
+    if (label) {
+      const todoName = label.textContent?.trim();
+      if (todoName) {
+        sendMessageToTopFrame({
+          type: 'TODO_COMPLETED',
+          data: todoName,
+        });
       }
     }
-  }, 3000);
+  }
 }
 
 function addIFrameEventListener() {
