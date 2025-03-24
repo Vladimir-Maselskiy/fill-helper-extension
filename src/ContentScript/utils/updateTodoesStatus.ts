@@ -11,11 +11,12 @@ export const updateTodoesStatus = ({
   todoes: TTodo[];
   setTodoes: React.Dispatch<React.SetStateAction<TTodo[]>>;
 }) => {
-  const newTodoes = todoes.map(todo => {
-    if (todo.name === target) {
-      return { ...todo, status: status };
-    }
-    return todo;
-  });
-  setTodoes(newTodoes);
+  setTodoes(prev =>
+    prev.map(todo => {
+      if (todo.name === target) {
+        return { ...todo, status: status };
+      }
+      return todo;
+    })
+  );
 };

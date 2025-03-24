@@ -29,6 +29,8 @@ browser.runtime.onMessage.addListener(
       );
     } else if (type === 'SET_CURRENT_TODOES_STATUS') {
       setCurrentTodoesStatus(data as TTodo[]).then(resp => response(resp));
+    } else if (type === 'CLEAR_LOCAL_STORAGE') {
+      browser.storage.local.clear();
     }
     return true;
   }
